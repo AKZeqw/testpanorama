@@ -11,6 +11,11 @@ const investigationStore = useInvestigationStore()
 const currentCase = computed(() => caseStore.currentCase)
 const res = computed(() => investigationStore.result)
 
+const selectedDecoyEvidences = computed(() => {
+  const ids = res.value?.selectedRedHerringIds || []
+  return currentCase.value.evidences.filter(e => ids.includes(e.id))
+})
+
 const handleRestart = () => {
   investigationStore.resetInvestigation()
   investigationStore.startTimer()
@@ -71,7 +76,7 @@ const handleBackHome = () => {
         </div>
 
         <!-- Metrics Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 my-8">
           <div class="bg-crime-950 p-4 rounded-xl border border-crime-800 text-center">
             <span class="text-[11px] font-mono text-gray-500 block mb-1">Bukti Ditemukan</span>
             <span class="text-base font-bold text-white">
@@ -92,6 +97,30 @@ const handleBackHome = () => {
           </div>
 
           <div class="bg-crime-950 p-4 rounded-xl border border-crime-800 text-center">
+            <span class="text-[11px] font-mono text-gray-500 block mb-1">Modus Operandi</span>
+            <span
+              :class="[
+                'text-base font-bold',
+                res?.isModusOperandiCorrect ? 'text-emerald-400' : 'text-amber-400'
+              ]"
+            >
+              {{ res?.isModusOperandiCorrect ? '✓ Tepat (+15)' : '✗ Keliru (0)' }}
+            </span>
+          </div>
+
+          <div class="bg-crime-950 p-4 rounded-xl border border-crime-800 text-center">
+            <span class="text-[11px] font-mono text-gray-500 block mb-1">Jebakan Red Herring</span>
+            <span
+              :class="[
+                'text-base font-bold',
+                (res?.redHerringsCount ?? 0) > 0 ? 'text-rose-400' : 'text-emerald-400'
+              ]"
+            >
+              {{ (res?.redHerringsCount ?? 0) > 0 ? `${res?.redHerringsCount} Terjebak (-${(res?.redHerringsCount ?? 0) * 10} pt)` : '✓ Bersih (0)' }}
+            </span>
+          </div>
+
+          <div class="bg-crime-950 p-4 rounded-xl border border-crime-800 text-center">
             <span class="text-[11px] font-mono text-gray-500 block mb-1">Analisis Logis</span>
             <span
               :class="[
@@ -99,7 +128,7 @@ const handleBackHome = () => {
                 res?.isExplanationValid ? 'text-emerald-400' : 'text-amber-400'
               ]"
             >
-              {{ res?.isExplanationValid ? '✓ Valid' : 'Kurang Lengkap' }}
+              {{ res?.isExplanationValid ? '✓ Valid (+10)' : 'Kurang Lengkap' }}
             </span>
           </div>
 
@@ -114,11 +143,58 @@ const handleBackHome = () => {
         <!-- Official Case Resolution -->
         <div class="bg-crime-950 p-6 rounded-2xl border border-crime-800 space-y-4">
           <h4 class="text-xs font-mono uppercase tracking-wider text-red-400 font-bold flex items-center gap-2">
-            <span>🔍</span> Fakta Kasus & Pelaku Sebenarnya
+            <span>🔍</span> Rekonstruksi Fakta & Kunci Forensik Kasus
           </h4>
-          <p class="text-xs text-gray-300 leading-relaxed">
-            Pelaku sebenarnya adalah <strong>Andi Saputra (Asisten Laboratorium)</strong>. Bukti kunci yang menjerat tersangka adalah ditemukannya <em>Kartu Akses Master #088</em> miliknya di dekat brankas, riwayat download file di <em>Laptop</em> korban pada pukul 22:07, serta catatan serah terima palsu pada <em>Buku Log Brankas</em>.
-          </p>
+          <div class="space-y-3 text-xs text-gray-300 leading-relaxed">
+            <p>
+              Pelaku sebenarnya adalah <strong>Andi Saputra (Asisten Laboratorium)</strong>.
+            </p>
+            <p>
+              <strong>Modus Operandi:</strong> Pelaku memanfaatkan wewenang internalnya untuk mengunduh log arsip pada pukul 22:07 sebelum sengaja memotong kabel CCTV laboratorium. Dengan <em>Kartu Akses Master #088</em> miliknya, ia membuka brankas penyimpanan arsip digital pada pukul 22:12 dan memalsukan paraf serah terima.
+            </p>
+            <p>
+              <strong>Bukti Forensik Tak Terbantahkan:</strong> Pemeriksaan menggunakan <em>Senter UV Forensik</em> membuktikan keberadaan pendaran residu kimia pada gagang pintu koridor yang memuat sidik jari jempol kanan dengan bekas goresan luka identik milik Andi Saputra—seketika mematahkan alibinya bahwa ia sudah pulang pada pukul 21:00.
+            </p>
+            <p class="text-gray-500 italic text-[11px] border-t border-crime-800 pt-2">
+              ⚠️ Catatan Forensik: Sarung Tangan Hitam Budi, Surat Somasi Dr. Citra, dan Kunci Berkarat adalah bukti Decoy (Red Herring) yang sengaja dirancang untuk menguji objektivitas dan logika deduksi penyidik.
+            </p>
+          </div>
+        </div>
+
+        <!-- Decoy Analysis Card -->
+        <div class="bg-crime-950 p-6 rounded-2xl border border-crime-800 space-y-3">
+          <h4 class="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-2">
+            <span>🎭</span> Evaluasi Jebakan Decoy (Red Herrings)
+          </h4>
+          
+          <div v-if="(res?.redHerringsCount ?? 0) > 0" class="space-y-3">
+            <p class="text-xs text-gray-300">
+              Anda menyertakan <strong class="text-rose-400">{{ res?.redHerringsCount }} bukti pengalih / decoy</strong> dalam kesimpulan yang mengakibatkan penalti skor (-{{ (res?.redHerringsCount ?? 0) * 10 }} poin):
+            </p>
+            <div class="space-y-2">
+              <div
+                v-for="decoy in selectedDecoyEvidences"
+                :key="decoy.id"
+                class="p-3.5 rounded-xl bg-rose-950/30 border border-rose-900/60 text-xs text-gray-300"
+              >
+                <div class="flex items-center justify-between font-bold text-rose-300 mb-1">
+                  <span>❌ {{ decoy.name }}</span>
+                  <span class="font-mono text-[10px] text-rose-400 font-bold">-10 Poin</span>
+                </div>
+                <p class="text-[11px] text-gray-400 leading-relaxed">{{ decoy.detailedAnalysis }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-800/60 text-xs text-emerald-300 flex items-center gap-3">
+            <span class="text-2xl">🛡️</span>
+            <div>
+              <strong class="block text-emerald-400 text-sm">Ketajaman Deduktif Sempurna!</strong>
+              <span class="text-[11px] text-emerald-200/80 leading-relaxed">
+                Anda berhasil mengabaikan seluruh jebakan bukti Decoy (Sarung Tangan Budi, Surat Somasi Dr. Citra, Kunci Berkarat) dan hanya mengandalkan bukti dengan kausalitas murni.
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Action CTAs -->

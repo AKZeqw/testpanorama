@@ -1,4 +1,4 @@
-export type HotspotType = 'evidence' | 'navigation' | 'info' | 'information' | 'secret'
+export type HotspotType = 'evidence' | 'navigation' | 'info' | 'information' | 'secret' | 'decoy'
 
 
 export interface Hotspot {

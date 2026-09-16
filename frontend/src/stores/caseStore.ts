@@ -4,7 +4,7 @@ import type { Case } from '../types/case'
 import type { Scene, Hotspot } from '../types/scene'
 import { dummyCases } from '../data/dummyCase'
 
-const STORAGE_KEY = 'crime_investigation_cases_v1'
+const STORAGE_KEY = 'crime_investigation_cases_v3'
 
 function loadStoredCases(): Case[] {
   try {

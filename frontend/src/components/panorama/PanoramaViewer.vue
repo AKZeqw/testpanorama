@@ -10,6 +10,7 @@ const props = defineProps<{
   panorama: string
   hotspots?: Hotspot[]
   isEditorMode?: boolean
+  isUvMode?: boolean
   tempMarker?: { yaw: string; pitch: string } | null
 }>()
 
@@ -17,6 +18,7 @@ const emit = defineEmits<{
   (e: 'select-evidence', evidenceId: string): void
   (e: 'navigate-scene', targetSceneId: string): void
   (e: 'sphere-click', coords: { yaw: string; pitch: string; yawRad: number; pitchRad: number }): void
+  (e: 'locked-clue', payload: { requiresEvidenceId: string; evidenceId?: string }): void
 }>()
 
 const viewerContainer = ref<HTMLElement | null>(null)
@@ -27,20 +29,27 @@ const createMarkerConfig = (hotspot: Hotspot) => {
   const isNav = hotspot.type === 'navigation'
   const isInfo = hotspot.type === 'information'
   const isSecret = hotspot.type === 'secret'
+  const isDecoy = hotspot.type === 'decoy'
 
-  let icon = '🔎'
-  let badgeClass = 'bg-red-900/90 text-red-200 border-red-400/80 shadow-red-500/30'
+  let icon = '🔍'
+  let badgeClass = 'bg-red-950/90 text-red-200 border-red-500/80 shadow-red-500/20'
 
   if (isNav) {
     icon = '🚪'
-    badgeClass = 'bg-blue-900/90 text-blue-200 border-blue-400/80 shadow-blue-500/30'
+    badgeClass = 'bg-blue-950/90 text-blue-200 border-blue-400/80 shadow-blue-500/20'
   } else if (isInfo) {
     icon = 'ℹ️'
-    badgeClass = 'bg-amber-900/90 text-amber-200 border-amber-400/80 shadow-amber-500/30'
+    badgeClass = 'bg-amber-950/90 text-amber-200 border-amber-400/80 shadow-amber-500/20'
   } else if (isSecret) {
     icon = '⚡'
-    badgeClass = 'bg-purple-900/90 text-purple-200 border-purple-400/80 shadow-purple-500/30'
+    badgeClass = 'bg-cyan-950/95 text-cyan-300 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)] font-black animate-pulse'
+  } else if (isDecoy && props.isEditorMode) {
+    icon = '🎭'
+    badgeClass = 'bg-rose-950/95 text-rose-300 border-rose-500/90 shadow-rose-500/30 ring-1 ring-rose-400'
   }
+
+  // Jika Senter UV aktif, redupkan bukti biasa agar pendaran fluoresens lebih menonjol
+  const opacityClass = props.isUvMode && !isSecret ? 'opacity-40 hover:opacity-100' : 'opacity-100'
 
   return {
     id: hotspot.id,
@@ -49,16 +58,16 @@ const createMarkerConfig = (hotspot: Hotspot) => {
       pitch: hotspot.pitch
     },
     html: `
-      <div class="cursor-pointer group flex flex-col items-center select-none transform hover:scale-110 transition-transform duration-150">
+      <div class="cursor-pointer group flex flex-col items-center select-none transform hover:scale-110 transition-all duration-150 ${opacityClass}">
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold shadow-lg backdrop-blur-sm ${badgeClass}">
           <span class="text-sm">${icon}</span>
           <span class="tracking-wide whitespace-nowrap">${hotspot.name}</span>
         </div>
-        <div class="w-1.5 h-1.5 rounded-full bg-white shadow-md mt-1 animate-pulse"></div>
+        <div class="w-1.5 h-1.5 rounded-full ${isSecret ? 'bg-cyan-300 shadow-[0_0_10px_#22d3ee]' : 'bg-white'} shadow-md mt-1 animate-pulse"></div>
       </div>
     `,
     tooltip: {
-      content: isNav ? `Pindah ke: ${hotspot.name}` : `${hotspot.name}`,
+      content: isNav ? `Pindah: ${hotspot.name}` : `${hotspot.name}`,
       position: 'top'
     },
     data: hotspot
@@ -71,6 +80,11 @@ const syncMarkers = () => {
 
   if (props.hotspots && props.hotspots.length > 0) {
     props.hotspots.forEach(hs => {
+      // Hotspot secret HANYA muncul jika mode UV aktif atau sedang dalam editor mode
+      if (hs.type === 'secret' && !props.isUvMode && !props.isEditorMode) {
+        return
+      }
+
       try {
         markersPlugin.addMarker(createMarkerConfig(hs))
       } catch (err) {
@@ -133,7 +147,9 @@ onMounted(() => {
 
     if (hs.type === 'navigation' && hs.targetSceneId) {
       emit('navigate-scene', hs.targetSceneId)
-    } else if (hs.type === 'evidence' && hs.evidenceId) {
+    } else if (hs.requiresEvidenceId) {
+      emit('locked-clue', { requiresEvidenceId: hs.requiresEvidenceId, evidenceId: hs.evidenceId })
+    } else if (hs.evidenceId) {
       emit('select-evidence', hs.evidenceId)
     }
   })
@@ -164,7 +180,7 @@ watch(() => props.panorama, async (newPanorama) => {
   }
 })
 
-watch(() => [props.hotspots, props.tempMarker], () => {
+watch(() => [props.hotspots, props.tempMarker, props.isUvMode], () => {
   syncMarkers()
 }, { deep: true })
 
@@ -176,8 +192,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="relative w-full h-full min-h-[500px]">
-    <div ref="viewerContainer" class="w-full h-full"></div>
+  <div class="relative w-full h-full min-h-[500px] overflow-hidden">
+    <div
+      ref="viewerContainer"
+      class="w-full h-full transition-[filter] duration-700 ease-in-out"
+      :class="isUvMode ? 'uv-blacklight-filter' : ''"
+    ></div>
 
     <!-- Indicator Editor Mode Overlay -->
     <div
@@ -188,10 +208,25 @@ onBeforeUnmount(() => {
       <span class="text-amber-300 font-bold">Hotspot Placement Mode:</span>
       <span class="text-gray-300">Klik panorama untuk memilih titik koordinat</span>
     </div>
+
+    <!-- Indicator UV Mode Active Overlay -->
+    <div
+      v-if="isUvMode"
+      class="absolute top-4 right-4 z-10 pointer-events-none bg-purple-950/90 backdrop-blur-md border border-purple-500/80 px-3.5 py-1.5 rounded-xl shadow-xl shadow-purple-950/60 flex items-center gap-2 text-xs animate-in fade-in duration-300"
+    >
+      <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse ring-2 ring-cyan-300/60"></span>
+      <span class="text-cyan-300 font-mono font-bold tracking-wider uppercase">Senter UV Menyala</span>
+      <span class="text-purple-300 text-[10px] hidden sm:inline">(Residu Fluoresens Aktif)</span>
+    </div>
   </div>
 </template>
 
 <style>
+/* Filter visual UV Blacklight */
+.uv-blacklight-filter {
+  filter: brightness(0.38) contrast(1.75) hue-rotate(245deg) saturate(2);
+}
+
 /* Override Photo Sphere Viewer tooltip dark styling */
 .psv-tooltip {
   background: rgba(15, 23, 42, 0.95) !important;
@@ -206,6 +241,5 @@ onBeforeUnmount(() => {
 .psv-navbar {
   background: rgba(13, 17, 23, 0.85) !important;
   backdrop-filter: blur(8px) !important;
-  border-top: 1px solid rgba(40, 51, 71, 0.7) !important;
-}
+  }
 </style>

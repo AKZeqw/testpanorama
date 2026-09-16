@@ -58,15 +58,8 @@ const handleAddEvidence = () => {
           <span class="px-2.5 py-1 rounded-md bg-crime-800 border border-crime-700 text-gray-300">
             📍 {{ evidence.discoveredSceneName }}
           </span>
-          <span
-            :class="[
-              'px-2.5 py-1 rounded-md font-semibold text-xs',
-              evidence.importance === 'Critical'
-                ? 'bg-red-950/80 text-red-300 border border-red-800'
-                : 'bg-amber-950/80 text-amber-300 border border-amber-800'
-            ]"
-          >
-            {{ evidence.importance }} Clue
+          <span class="px-2.5 py-1 rounded-md font-semibold text-xs bg-red-950/80 text-red-300 border border-red-800 flex items-center gap-1">
+            <span>🏷️</span> {{ evidence.category || 'Bukti Fisik' }}
           </span>
         </div>
 

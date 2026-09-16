@@ -19,6 +19,10 @@ const currentScene = computed(() => caseStore.currentScene)
 const isEvidenceModalOpen = ref(false)
 const activeEvidence = ref<Evidence | null>(null)
 
+// State Forensic UV Tool & Locked Clues
+const isUvMode = ref(false)
+const lockedClueMessage = ref<string | null>(null)
+
 // State Sidebar Tab
 const activeTab = ref<'brief' | 'notes' | 'scenes'>('brief')
 const newNoteInput = ref('')
@@ -32,6 +36,19 @@ const handleSelectEvidence = (evidenceId: string) => {
   if (found) {
     activeEvidence.value = found
     isEvidenceModalOpen.value = true
+  }
+}
+
+const handleLockedClue = (payload: { requiresEvidenceId: string; evidenceId?: string }) => {
+  const isUnlocked = investigationStore.isEvidenceDiscovered(payload.requiresEvidenceId)
+  if (isUnlocked) {
+    if (payload.evidenceId) {
+      handleSelectEvidence(payload.evidenceId)
+    }
+  } else {
+    const reqEv = currentCase.value.evidences.find(e => e.id === payload.requiresEvidenceId)
+    const clueName = reqEv ? reqEv.name : 'bukti otorisasi kunci'
+    lockedClueMessage.value = `Objek ini terproteksi dan membutuhkan "${clueName}" untuk dapat diinspeksi. Temukan bukti tersebut di TKP terlebih dahulu!`
   }
 }
 
@@ -90,6 +107,22 @@ const handleAddNote = () => {
           </span>
         </router-link>
 
+        <!-- Senter UV Toggle Button -->
+        <button
+          @click="isUvMode = !isUvMode"
+          :class="[
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition shadow-sm',
+            isUvMode
+              ? 'bg-purple-950 text-cyan-300 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.6)] ring-1 ring-cyan-400'
+              : 'bg-crime-800 hover:bg-crime-700 text-gray-300 border-crime-700'
+          ]"
+          title="Nyalakan Senter UV untuk mengungkap pendaran sidik jari & residu tersembunyi"
+        >
+          <span>🔦</span>
+          <span class="hidden sm:inline">Senter UV:</span>
+          <span :class="isUvMode ? 'text-cyan-300 font-mono' : 'text-gray-400 font-mono'">{{ isUvMode ? 'ON' : 'OFF' }}</span>
+        </button>
+
         <!-- Timer -->
         <TimerBadge />
       </div>
@@ -119,8 +152,10 @@ const handleAddNote = () => {
         <PanoramaViewer
           :panorama="currentScene.panoramaPath"
           :hotspots="currentScene.hotspots"
+          :is-uv-mode="isUvMode"
           @select-evidence="handleSelectEvidence"
           @navigate-scene="handleNavigateScene"
+          @locked-clue="handleLockedClue"
         />
 
         <!-- Scene Bottom Bar Overlay -->
@@ -287,5 +322,32 @@ const handleAddNote = () => {
       :is-open="isEvidenceModalOpen"
       @close="isEvidenceModalOpen = false"
     />
+
+    <!-- Forensic Locked Clue Alert Modal -->
+    <div
+      v-if="lockedClueMessage"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
+      <div class="bg-crime-900 border border-amber-500/80 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
+        <div class="w-14 h-14 rounded-full bg-amber-950/80 border border-amber-500 text-2xl flex items-center justify-center mx-auto text-amber-400 animate-pulse">
+          🔒
+        </div>
+        <div>
+          <span class="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-widest">Akses Forensik Terkunci</span>
+          <h3 class="text-base font-bold text-white mt-1">
+            Objek Terproteksi
+          </h3>
+        </div>
+        <p class="text-xs text-gray-300 leading-relaxed bg-crime-950 p-4 rounded-xl border border-crime-800">
+          {{ lockedClueMessage }}
+        </p>
+        <button
+          @click="lockedClueMessage = null"
+          class="w-full py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-md shadow-amber-950 transition"
+        >
+          Saya Mengerti, Telusuri TKP Dahulu
+        </button>
+      </div>
+    </div>
   </div>
 </template>

@@ -23,15 +23,8 @@ const emit = defineEmits<{
             {{ evidence.name }}
           </h4>
         </div>
-        <span
-          :class="[
-            'text-[11px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider',
-            evidence.importance === 'Critical'
-              ? 'bg-red-950/90 text-red-400 border border-red-800'
-              : 'bg-amber-950/90 text-amber-400 border border-amber-800'
-          ]"
-        >
-          {{ evidence.importance }}
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-crime-800 text-gray-300 border border-crime-700 uppercase tracking-wider">
+          {{ evidence.category || 'Bukti TKP' }}
         </span>
       </div>
 

@@ -26,5 +26,8 @@ export interface Case {
     correctSuspectId: string
     keyEvidenceIds: string[]
     explanationKeywords: string[]
+    correctModusOperandi?: string
+    redHerringEvidenceIds?: string[]
   }
 }
+

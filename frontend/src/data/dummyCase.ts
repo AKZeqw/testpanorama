@@ -5,12 +5,12 @@ export const dummyCases: Case[] = [
     id: 'case-001',
     caseNumber: 'Case #001',
     title: 'The Missing Evidence',
-    description: 'Sebuah sampel penelitian penting dilaporkan hilang dari laboratorium riset pada pukul 22:15 malam. Sistem brankas dibuka secara paksa dan CCTV utama mendadak dinonaktifkan.',
+    description: 'Sebuah sampel penelitian bernilai tinggi dilaporkan hilang dari brankas laboratorium riset. Alarm sensor brankas berbunyi pada pukul 22:15 WIB. Listrik gedung sempat padam mendadak selama 5 menit sebelum insiden.',
     difficulty: 'Medium',
     location: 'Research Laboratory & Forensic Storage',
     time: '22:15 WIB',
-    objective: 'Telusuri TKP laboratorium, koridor, dan ruang arsip penyimpanan untuk menemukan bukti-bukti kunci, mengidentifikasi tersangka utama, dan menyusun kesimpulan investigasi.',
-    initialInfo: 'Penjaga gedung melapor bahwa lampu lab sempat padam selama 5 menit sekitar pukul 22:10. Tidak ada tanda kerusakan pada pintu luar gedung.',
+    objective: 'Temukan bukti-bukti otentik di TKP, bedakan fakta forensik dari petunjuk palsu, pecahkan kode akses brankas, dan ungkap pelaku sebenarnya.',
+    initialInfo: 'Penjaga gedung melapor lampu lab padam pukul 22:10. Tidak ada kerusakan fisik pada pintu luar gedung. Hujan lebat baru mulai mengguyur area sekitar pada pukul 22:08.',
     status: 'Available',
     coverImage: '/panoramas/laboratory.jpg',
     initialSceneId: 'laboratory',
@@ -25,8 +25,8 @@ export const dummyCases: Case[] = [
           {
             id: 'hs-laptop',
             type: 'evidence',
-            name: 'Laptop Menyala',
-            description: 'Laptop di atas meja kerja masih menyala dengan dokumen rahasia terbuka.',
+            name: 'Perangkat Komputer',
+            description: 'Komputer meja di ruang penelitian dengan layar monitor yang masih aktif.',
             yaw: '40deg',
             pitch: '-8deg',
             evidenceId: 'ev-laptop'
@@ -34,8 +34,8 @@ export const dummyCases: Case[] = [
           {
             id: 'hs-cctv',
             type: 'evidence',
-            name: 'Kamera Pengawas CCTV',
-            description: 'Kamera di sudut dinding tampak mati dan lampu indikatornya padam.',
+            name: 'Instalasi Kabel Sudut',
+            description: 'Sambungan kabel kelistrikan dan pengawasan di sudut langit-langit ruangan.',
             yaw: '135deg',
             pitch: '10deg',
             evidenceId: 'ev-cctv'
@@ -43,16 +43,25 @@ export const dummyCases: Case[] = [
           {
             id: 'hs-access-card',
             type: 'evidence',
-            name: 'Kartu Akses Master',
-            description: 'Kartu identitas pegawai terjatuh di bawah laci meja berkas.',
+            name: 'Objek di Bawah Laci',
+            description: 'Benda plastik tipis berlogo instansi terjatuh dan terselip di bawah laci berkas.',
             yaw: '-40deg',
             pitch: '-22deg',
             evidenceId: 'ev-access-card'
           },
           {
+            id: 'hs-decoy-debt',
+            type: 'decoy',
+            name: 'Map Dokumen Meja Peneliti',
+            description: 'Map arsip keuangan terbuka berisi berkas somasi hutang riset dan tenggat waktu pendanaan.',
+            yaw: '15deg',
+            pitch: '-18deg',
+            evidenceId: 'ev-decoy-debt'
+          },
+          {
             id: 'hs-door-to-corridor',
             type: 'navigation',
-            name: 'Pintu Koridor',
+            name: 'Pintu Keluar Lorong',
             description: 'Pintu keluar menuju lorong koridor laboratorium.',
             yaw: '-155deg',
             pitch: '-3deg',
@@ -70,16 +79,43 @@ export const dummyCases: Case[] = [
           {
             id: 'hs-footprint',
             type: 'evidence',
-            name: 'Jejak Sepatu Basah',
-            description: 'Terdapat bekas jejak lumpur basah berukuran sepatu boot pria nomor 42.',
+            name: 'Noda di Lantai',
+            description: 'Noda kecokelatan basah yang tampak seperti bekas pijakan sol sepatu.',
             yaw: '55deg',
             pitch: '-26deg',
             evidenceId: 'ev-footprint'
           },
           {
+            id: 'hs-decoy-glove',
+            type: 'decoy',
+            name: 'Kisi Ventilasi Udara',
+            description: 'Celah ventilasi udara koridor yang sedikit renggang dengan sehelai kain hitam terselip.',
+            yaw: '20deg',
+            pitch: '-28deg',
+            evidenceId: 'ev-decoy-glove'
+          },
+          {
+            id: 'hs-decoy-key',
+            type: 'decoy',
+            name: 'Benda Dekat Tangga Darurat',
+            description: 'Sebuah anak kunci logam dengan gantungan label fisik tergeletak di sudut tangga.',
+            yaw: '-45deg',
+            pitch: '-26deg',
+            evidenceId: 'ev-decoy-key'
+          },
+          {
+            id: 'hs-uv-fingerprint',
+            type: 'secret',
+            name: 'Pendaran Kimia Gagang Pintu',
+            description: 'Residu pendaran fluoresens tak kasat mata yang hanya tampak di bawah sinar ultraviolet.',
+            yaw: '-115deg',
+            pitch: '-14deg',
+            evidenceId: 'ev-uv-fingerprint'
+          },
+          {
             id: 'hs-door-to-lab',
             type: 'navigation',
-            name: 'Masuk Laboratorium',
+            name: 'Pintu Laboratorium',
             description: 'Pintu menuju ruang laboratorium penelitian.',
             yaw: '-95deg',
             pitch: '-2deg',
@@ -88,7 +124,7 @@ export const dummyCases: Case[] = [
           {
             id: 'hs-door-to-storage',
             type: 'navigation',
-            name: 'Ruang Penyimpanan (Storage)',
+            name: 'Pintu Besi Storage',
             description: 'Pintu besi menuju ruang arsip dan brankas penyimpanan barang bukti.',
             yaw: '95deg',
             pitch: '-2deg',
@@ -106,16 +142,17 @@ export const dummyCases: Case[] = [
           {
             id: 'hs-document',
             type: 'evidence',
-            name: 'Buku Log Berkas',
-            description: 'Buku catatan serah terima kunci brankas dengan tanda tangan mencurigakan.',
+            name: 'Brankas Arsip Digital',
+            description: 'Perangkat brankas dengan pemindai kartu otorisasi dan buku register pembukaan.',
             yaw: '-65deg',
             pitch: '-18deg',
-            evidenceId: 'ev-document'
+            evidenceId: 'ev-document',
+            requiresEvidenceId: 'ev-access-card'
           },
           {
             id: 'hs-door-to-corridor-from-storage',
             type: 'navigation',
-            name: 'Kembali ke Koridor',
+            name: 'Pintu Keluar Koridor',
             description: 'Pintu keluar kembali ke lorong koridor gedung.',
             yaw: '175deg',
             pitch: '-2deg',
@@ -127,54 +164,107 @@ export const dummyCases: Case[] = [
     evidences: [
       {
         id: 'ev-laptop',
-        name: 'Laptop Korban',
-        description: 'Laptop ditemukan dalam keadaan menyala. Ada file log akses brankas yang diunduh pada pukul 22:07.',
-        detailedAnalysis: 'Analisis forensik digital menunjukkan upaya menghapus rekaman riwayat akses 8 menit sebelum pemadaman listrik.',
+        name: 'Log Forensik Digital Laptop',
+        description: 'Layar komputer menampilkan unduhan file terenkripsi pada pukul 22:07 menggunakan kredensial internal.',
+        detailedAnalysis: 'Analisis jejak digital menunjukkan adanya upaya penghapusan riwayat aktivitas 3 menit sebelum pemadaman listrik.',
         discoveredSceneId: 'laboratory',
         discoveredSceneName: 'Laboratory (TKP Utama)',
         importance: 'Critical',
+        category: 'Digital',
         relatedSuspectIds: ['suspect-andi'],
         relatedEvidenceIds: ['ev-access-card']
       },
       {
         id: 'ev-cctv',
-        name: 'Kabel Kamera CCTV',
-        description: 'Kabel daya CCTV di sudut laboratorium dipotong rapi dengan tang pemotong listrik presisi.',
-        detailedAnalysis: 'Potongan kabel sangat rapi, mengindikasikan pelaku paham tata letak instalasi kabel gedung.',
+        name: 'Potongan Kabel Sudut 45°',
+        description: 'Kabel daya kamera pengawas dipotong rapi dengan tang pemotong listrik tegangan tinggi berisolasi.',
+        detailedAnalysis: 'Potongan bersih bersudut 45° membuktikan pelaku memiliki keterampilan teknis kelistrikan dan paham tata kabel gedung.',
         discoveredSceneId: 'laboratory',
         discoveredSceneName: 'Laboratory (TKP Utama)',
         importance: 'Supporting',
+        category: 'Fisik',
         relatedSuspectIds: ['suspect-budi']
       },
       {
         id: 'ev-access-card',
         name: 'Kartu Akses Master #088',
-        description: 'Kartu akses berkode ID 088 atas nama asisten lab ditemukan tertinggal dekat brankas.',
-        detailedAnalysis: 'Terdapat sidik jari yang cocok dengan pemegang kartu, membuktikan kartu digunakan secara fisik pada jam kejadian.',
+        description: 'Kartu RFID master yang diterbitkan khusus untuk staf riset senior dan asisten lab.',
+        detailedAnalysis: 'Nomor seri ID #088 tercatat atas nama asisten riset. Kartu ini digunakan untuk mengaktifkan pemindai brankas pada jam kejadian.',
         discoveredSceneId: 'laboratory',
         discoveredSceneName: 'Laboratory (TKP Utama)',
         importance: 'Critical',
+        category: 'Fisik',
         relatedSuspectIds: ['suspect-andi']
       },
       {
         id: 'ev-footprint',
-        name: 'Jejak Sepatu Basah',
-        description: 'Jejak lumpur dari sepatu boot ukuran 42 mengarah tergesa-gesa dari lab menuju ruang arsip.',
-        detailedAnalysis: 'Bahan sol sepatu identik dengan sepatu dinas petugas teknis atau petugas keamanan.',
+        name: 'Jejak Sepatu Berlumpur Basah',
+        description: 'Tapak sepatu boot nomor 42 dengan lumpur basah mengarah tergesa-gesa ke ruang brankas.',
+        detailedAnalysis: 'Kadar kelembapan tanah membuktikan jejak dibuat saat hujan lebat yang baru turun pukul 22:08 WIB.',
         discoveredSceneId: 'corridor',
         discoveredSceneName: 'Corridor (Lorong Gedung)',
         importance: 'Supporting',
+        category: 'Biometrik',
         relatedSuspectIds: ['suspect-budi', 'suspect-andi']
       },
       {
         id: 'ev-document',
-        name: 'Buku Log Berkas Brankas',
-        description: 'Catatan serah terima spesimen menunjukkan brankas dibuka pada pukul 22:12 dengan tanda tangan palsu.',
-        detailedAnalysis: 'Tinta tanda tangan masih baru dan coretan tangan tidak sesuai dengan tanda tangan kepala riset.',
+        name: 'Buku Log Pembukaan Brankas',
+        description: 'Catatan serah terima spesimen menunjukkan brankas dibuka pada pukul 22:12 dengan paraf tergesa-gesa.',
+        detailedAnalysis: 'Tinta paraf masih basah. Tanda tangan dipalsukan dan tidak cocok dengan spesimen tanda tangan kepala riset.',
         discoveredSceneId: 'storage-room',
         discoveredSceneName: 'Storage Room (Ruang Penyimpanan)',
         importance: 'Critical',
+        category: 'Dokumen',
         relatedSuspectIds: ['suspect-andi', 'suspect-citra']
+      },
+      {
+        id: 'ev-uv-fingerprint',
+        name: 'Sidik Jari Laten UV di Gagang Pintu',
+        description: 'Pendaran residu fluoresens di bawah sinar UV mengungkap cetakan sidik jari jempol kanan dengan bekas luka gores khas.',
+        detailedAnalysis: 'Ciri goresan luka jempol kanan cocok 100% dengan rekam biometrik Andi Saputra, mematahkan klaim bahwa ia tidak berada di TKP.',
+        discoveredSceneId: 'corridor',
+        discoveredSceneName: 'Corridor (Lorong Gedung)',
+        importance: 'Critical',
+        category: 'Biometrik',
+        relatedSuspectIds: ['suspect-andi']
+      },
+      // Red Herrings (Bukti Decoy / Pengalih yang Sangat Menggoda)
+      {
+        id: 'ev-decoy-debt',
+        name: 'Surat Somasi & Penolakan Hibah Riset',
+        description: 'Surat peringatan keras dari dekanat yang menuntut pertanggungjawaban dana miliaran rupiah atau laboratorium Dr. Citra akan dibekukan.',
+        detailedAnalysis: 'Tampak memberi motif kejahatan yang luar biasa kuat bagi Dr. Citra untuk merekayasa pencurian demi asuransi. Namun verifikasi stempel rektorat membuktikan Dr. Citra sedang menandatangani berkas tersebut secara fisik di Gedung Rektorat lantai 3 pada pukul 22:15 WIB.',
+        discoveredSceneId: 'laboratory',
+        discoveredSceneName: 'Laboratory (TKP Utama)',
+        importance: 'Decoy',
+        category: 'Dokumen',
+        isRedHerring: true,
+        relatedSuspectIds: ['suspect-citra']
+      },
+      {
+        id: 'ev-decoy-glove',
+        name: 'Sarung Tangan Kerja Hitam Berlumur Oli',
+        description: 'Sarung tangan kain tebal dengan serat identik seragam regu pengamanan malam, terselip di kisi ventilasi koridor.',
+        detailedAnalysis: 'Sangat mencurigakan dan tampak mengarah langsung ke satpam Budi Santoso. Namun uji laboratorium mendeteksi partikel debu tebal dan ketiadaan residu brankas—sarung tangan ini terjatuh saat servis ventilasi AC dua minggu lalu.',
+        discoveredSceneId: 'corridor',
+        discoveredSceneName: 'Corridor (Lorong Gedung)',
+        importance: 'Decoy',
+        category: 'Fisik',
+        isRedHerring: true,
+        relatedSuspectIds: ['suspect-budi']
+      },
+      {
+        id: 'ev-decoy-key',
+        name: 'Gantungan Kunci Cadangan Koridor #02',
+        description: 'Anak kunci fisik berlabel satpam bertuliskan "Pintu Darurat & Lab #02" yang tergeletak di sudut tangga darurat.',
+        detailedAnalysis: 'Gerigi kunci sudah aus dan berkarat. Silinder pintu laboratorium telah dimodernisasi menggunakan kunci elektronik magnetik, sehingga kunci fisik ini mustahil dipakai membobol ruangan pada malam kejadian.',
+        discoveredSceneId: 'corridor',
+        discoveredSceneName: 'Corridor (Lorong Gedung)',
+        importance: 'Decoy',
+        category: 'Fisik',
+        isRedHerring: true,
+        relatedSuspectIds: ['suspect-budi']
       }
     ],
     suspects: [
@@ -182,34 +272,36 @@ export const dummyCases: Case[] = [
         id: 'suspect-andi',
         name: 'Andi Saputra',
         role: 'Asisten Laboratorium',
-        description: 'Memiliki akses langsung ke komputer riset dan mengetahui kode kombinasi awal brankas.',
-        alibi: 'Mengaku sudah meninggalkan gedung jam 21:00, namun kartu aksesnya terbukti aktif pukul 22:05.',
+        description: 'Memiliki akses ke komputer riset dan memegang kartu akses master ID #088.',
+        alibi: 'Mengklaim sudah pulang pukul 21:00 dan tidak pernah menginjakkan kaki di gedung saat hujan turun.',
         accessLevel: 'Laboratorium & Ruang Komputer',
-        relatedEvidenceIds: ['ev-laptop', 'ev-access-card', 'ev-document']
+        relatedEvidenceIds: ['ev-laptop', 'ev-access-card', 'ev-document', 'ev-uv-fingerprint']
       },
       {
         id: 'suspect-budi',
         name: 'Budi Santoso',
         role: 'Petugas Keamanan Malam',
-        description: 'Bertanggung jawab atas pengawasan CCTV dan kunci cadangan lorong koridor.',
-        alibi: 'Mengklaim sedang mengecek gerbang utama saat listrik padam, tidak berada di dekat koridor lab.',
+        description: 'Memegang kunci cadangan fisik koridor dan memakai sepatu dinas boot ukuran 42. Menjadi sasaran kecurigaan utama akibat sarung tangan dan kunci cadangan.',
+        alibi: 'Mengaku berada di pos gerbang utama yang berjarak 100 meter saat pemadaman listrik terjadi.',
         accessLevel: 'Seluruh Gedung',
-        relatedEvidenceIds: ['ev-cctv', 'ev-footprint']
+        relatedEvidenceIds: ['ev-cctv', 'ev-footprint', 'ev-decoy-glove', 'ev-decoy-key']
       },
       {
         id: 'suspect-citra',
         name: 'Dr. Citra Lestari',
         role: 'Peneliti Utama (Lead Researcher)',
-        description: 'Pemilik lisensi utama sampel yang hilang. Memiliki kepentingan klaim asuransi riset.',
-        alibi: 'Bekerja lembur di ruang kantor lantai 3 hingga larut malam.',
+        description: 'Penanggung jawab formula riset yang hilang. Menghadapi batas waktu pendanaan proyek dan surat somasi penutupan lab.',
+        alibi: 'Lembur di ruang kantor lantai 3 dan menandatangani berkas rektorat sampai alarm berbunyi.',
         accessLevel: 'Laboratorium & Ruang Penyimpanan',
-        relatedEvidenceIds: ['ev-document']
+        relatedEvidenceIds: ['ev-document', 'ev-decoy-debt']
       }
     ],
     solution: {
       correctSuspectId: 'suspect-andi',
-      keyEvidenceIds: ['ev-laptop', 'ev-access-card', 'ev-document'],
-      explanationKeywords: ['andi', 'laptop', 'akses', 'kartu', 'brankas', 'log']
+      correctModusOperandi: 'modus-andi',
+      keyEvidenceIds: ['ev-laptop', 'ev-access-card', 'ev-document', 'ev-uv-fingerprint'],
+      redHerringEvidenceIds: ['ev-decoy-debt', 'ev-decoy-glove', 'ev-decoy-key'],
+      explanationKeywords: ['andi', 'kartu', 'akses', 'laptop', 'sidik', 'brankas', 'lumpur', 'hujan', 'cctv', 'paraf']
     }
   }
 ]

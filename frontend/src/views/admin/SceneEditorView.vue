@@ -97,7 +97,7 @@ const handleSaveHotspot = () => {
     yaw: hotspotForm.value.yaw,
     pitch: hotspotForm.value.pitch,
     targetSceneId: hotspotForm.value.type === 'navigation' ? hotspotForm.value.targetSceneId : undefined,
-    evidenceId: hotspotForm.value.type === 'evidence' ? (hotspotForm.value.evidenceId || `ev-${hsId}`) : undefined
+    evidenceId: (hotspotForm.value.type === 'evidence' || hotspotForm.value.type === 'decoy') ? (hotspotForm.value.evidenceId || `ev-${hsId}`) : undefined
   }
 
   if (hotspotForm.value.id) {
@@ -360,10 +360,11 @@ const handleDeleteScene = (sId: string, sName: string) => {
               v-model="hotspotForm.type"
               class="w-full bg-crime-950 border border-crime-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
             >
-              <option value="evidence">🔎 Evidence (Barang Bukti)</option>
+              <option value="evidence">🔎 Evidence (Barang Bukti Asli)</option>
+              <option value="decoy">🎭 Decoy / Red Herring (Bukti Pengalih / Jebakan)</option>
               <option value="navigation">🚪 Navigation (Pindah Ruangan)</option>
               <option value="information">ℹ️ Information (Petunjuk / Tanda)</option>
-              <option value="secret">⚡ Secret (Bukti Tersembunyi)</option>
+              <option value="secret">⚡ Secret (Bukti Tersembunyi UV)</option>
             </select>
           </div>
 
@@ -407,8 +408,8 @@ const handleDeleteScene = (sId: string, sName: string) => {
             </select>
           </div>
 
-          <!-- If Evidence: Link to Case Evidence -->
-          <div v-if="hotspotForm.type === 'evidence'">
+          <!-- If Evidence or Decoy: Link to Case Evidence -->
+          <div v-if="hotspotForm.type === 'evidence' || hotspotForm.type === 'decoy'">
             <label class="block text-xs font-semibold text-gray-300 mb-1.5">Tautkan ke Master Barang Bukti</label>
             <select
               v-model="hotspotForm.evidenceId"

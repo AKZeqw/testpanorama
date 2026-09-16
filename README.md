@@ -1,28 +1,39 @@
-# Crime Investigation — Panorama 360° Web Game
+# Crime Investigation — Panorama 360° Web Game (Prototype)
 
-Aplikasi web game investigasi kasus kriminal (*Crime Investigation*) berbasis panorama 360° equirectangular seperti Google Street View. Pemain dapat menelusuri lokasi kejadian perkara (TKP), memeriksa barang bukti melalui hotspot interaktif, berpindah ruangan secara dinamis, menginterogasi tersangka, dan merumuskan kesimpulan kasus kriminal.
+Aplikasi web game investigasi kasus kriminal (*Crime Investigation*) berbasis panorama 360° equirectangular seperti Google Street View. Pemain dapat menelusuri lokasi kejadian perkara (TKP), memeriksa barang bukti melalui hotspot interaktif, berpindah ruangan secara dinamis, menginterogasi tersangka, menyalakan senter UV forensik, menghindari bukti pengalih (*decoy*), dan merumuskan kesimpulan kasus kriminal.
 
-Selain sisi pemain, aplikasi dilengkapi dengan **Admin & Lecturer Portal** untuk membuat skenario kasus baru, mengatur adegan ruangan (scene), serta menentukan koordinat hotspot 360° secara interaktif (*click-to-pick* derajat yaw dan pitch).
+Project ini dibuat secara **modular, ringan, dan mandiri (Local-First)** untuk menguji batas ide dan mengeksplorasi rancangan konsep (*Proof of Concept*) sebelum implementasi skala produksi.
 
 ---
 
-## 📁 Struktur Project Monorepo
+## 🌟 Fitur Utama Prototype
+
+1. **Eksplorasi 360° Realistis**: Navigasi panorama equirectangular menggunakan Photo Sphere Viewer, drag mouse, zoom, dan perpindahan antar ruangan secara mulus tanpa reload halaman.
+2. **Senter UV Forensik**: Toggle blacklight UV yang meredupkan cahaya dan mengungkap sidik jari laten serta pendaran residu kimia tersembunyi.
+3. **Chained / Locked Evidence**: Teka-teki berantai di mana objek tertentu (seperti brankas arsip) terproteksi dan membutuhkan barang bukti kunci otorisasi untuk dapat dibuka.
+4. **Sistem Decoy (Red Herrings)**: Barang bukti pengalih yang sangat menggoda dan mengarah ke tersangka lain, menguji ketajaman mahasiswa dengan penalti skor jika keliru memilih bukti.
+5. **Sidang Kesimpulan & Rekonstruksi**: Penentuan tersangka, pemilihan modus operandi operasional, serta evaluasi analisis kronologis.
+6. **Portal Dosen & Interactive 360° Hotspot Editor**: Klik langsung sembarang titik pada panorama 360° untuk menangkap koordinat `yaw` dan `pitch` secara otomatis guna menambahkan barang bukti, pintu navigasi, ataupun decoy.
+
+---
+
+## 📁 Struktur Folder Project
 
 ```
-testpanorama/ (crime-investigation)
+testpanorama/
 ├── frontend/
 │   ├── public/
 │   │   └── panoramas/
-│   │       ├── laboratory.jpg       # Panorama TKP Laboratorium
-│   │       ├── corridor.jpg         # Panorama Lorong Gedung
-│   │       └── storage-room.jpg     # Panorama Ruang Penyimpanan
+│   │       ├── laboratory.jpg          # Panorama TKP Laboratorium
+│   │       ├── corridor.jpg            # Panorama Lorong Gedung
+│   │       └── storage-room.jpg        # Panorama Ruang Arsip & Brankas
 │   │
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── panorama/
-│   │   │   │   └── PanoramaViewer.vue  # Viewer 360° + MarkersPlugin + Editor Mode
+│   │   │   │   └── PanoramaViewer.vue  # Viewer 360° + Markers + Mode Senter UV
 │   │   │   ├── evidence/
-│   │   │   │   ├── EvidenceModal.vue   # Modal temuan bukti interaktif
+│   │   │   │   ├── EvidenceModal.vue   # Modal temuan bukti interaktif (netral)
 │   │   │   │   └── EvidenceCard.vue    # Kartu barang bukti
 │   │   │   ├── suspect/
 │   │   │   │   └── SuspectCard.vue     # Kartu alibi & profil tersangka
@@ -32,32 +43,27 @@ testpanorama/ (crime-investigation)
 │   │   ├── views/
 │   │   │   ├── HomeView.vue            # Halaman utama daftar kasus
 │   │   │   ├── CaseBriefView.vue       # Berkas briefing kasus
-│   │   │   ├── InvestigationView.vue   # Halaman utama investigasi 360°
+│   │   │   ├── InvestigationView.vue   # Halaman investigasi 360° + Senter UV
 │   │   │   ├── EvidenceView.vue        # Papan bukti (Evidence Board)
 │   │   │   ├── SuspectView.vue         # Papan tersangka (Suspects Board)
-│   │   │   ├── ConclusionView.vue      # Form kesimpulan akhir
-│   │   │   ├── ResultView.vue          # Skor & evaluasi investigasi
+│   │   │   ├── ConclusionView.vue      # Form kesimpulan akhir & Modus Operandi
+│   │   │   ├── ResultView.vue          # Skor & evaluasi debrief forensik
 │   │   │   │
 │   │   │   └── admin/
-│   │   │       ├── AdminDashboardView.vue  # Dashboard ringkasan dosen/admin
-│   │   │       ├── CaseManagementView.vue  # Manajemen daftar kasus (CRUD & Publish)
-│   │   │       ├── CaseEditorView.vue      # Editor skenario kasus & penilaian
-│   │   │       └── SceneEditorView.vue     # Interactive 360° Scene & Hotspot Editor
+│   │   │       ├── AdminDashboardView.vue  # Ringkasan analitik kasus
+│   │   │       ├── CaseManagementView.vue  # Manajemen skenario kasus (CRUD)
+│   │   │       ├── CaseEditorView.vue      # Editor skenario kasus
+│   │   │       └── SceneEditorView.vue     # Interactive 360° Hotspot Editor
 │   │   │
 │   │   ├── stores/
-│   │   │   ├── caseStore.ts            # State kasus, adegan aktif, & localStorage sync
-│   │   │   ├── investigationStore.ts   # State timer, bukti terkumpul, & skor
-│   │   │   └── userStore.ts            # State profil pengguna & role
+│   │   │   ├── caseStore.ts            # State kasus & localStorage sync
+│   │   │   ├── investigationStore.ts   # State bukti, timer, & penilaian
+│   │   │   └── userStore.ts            # State pengguna
 │   │   │
-│   │   ├── services/
-│   │   │   ├── api.ts                  # HTTP client layer
-│   │   │   ├── caseService.ts          # Layanan REST API kasus & fallback
-│   │   │   └── evidenceService.ts      # Layanan bukti
-│   │   │
-│   │   ├── types/                      # Interface data TypeScript (case, scene, evidence, suspect)
+│   │   ├── types/                      # TypeScript interfaces
 │   │   ├── data/
-│   │   │   └── dummyCase.ts            # Data kasus #001 & koordinat hotspot default
-│   │   ├── router/index.ts             # Routing halaman game & portal admin
+│   │   │   └── dummyCase.ts            # Kasus default #001 lengkap dengan decoy & UV
+│   │   ├── router/index.ts             # Routing Vue Router
 │   │   ├── App.vue
 │   │   ├── main.ts
 │   │   └── style.css
@@ -66,55 +72,29 @@ testpanorama/ (crime-investigation)
 │   ├── vite.config.ts
 │   └── tailwind.config.js
 │
-├── backend/
-│   ├── app/
-│   │   ├── routes/
-│   │   │   ├── cases.py            # Endpoint CRUD /api/cases
-│   │   │   ├── scenes.py           # Endpoint CRUD /api/scenes & /api/hotspots
-│   │   │   ├── evidences.py        # Endpoint /api/cases/<id>/evidences
-│   │   │   ├── suspects.py         # Endpoint /api/cases/<id>/suspects
-│   │   │   ├── investigations.py   # Endpoint sesi investigasi & kesimpulan
-│   │   │   └── auth.py             # Endpoint autentikasi & profile
-│   │   │
-│   │   ├── models/                 # Model relasional kasus, ruangan, bukti, tersangka, user
-│   │   ├── config.py
-│   │   └── __init__.py             # Factory app Flask + CORS
-│   │
-│   ├── run.py
-│   └── requirements.txt
-│
+├── package.json                        # Root helper runner
 └── README.md
 ```
 
 ---
 
-## 🚀 Cara Menjalankan
+## 🚀 Cara Menjalankan Aplikasi
 
-### 1. Frontend (Vue 3 + Vite + TypeScript)
+Aplikasi murni menggunakan Node.js dan Vite, tanpa dependensi server Python eksternal:
 
-Masuk ke folder `frontend`:
 ```bash
-cd frontend
-npm install
+# 1. Masuk ke root directory
+cd testpanorama
+
+# 2. Install dependensi
+npm --prefix frontend install
+
+# 3. Jalankan aplikasi (Dev Server)
 npm run dev
 ```
 
-Buka browser di:
-`http://127.0.0.1:5173/`
-
-### 2. Backend (Flask REST API)
-
-Masuk ke folder `backend`:
-```bash
-cd backend
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-python run.py
-```
-
-Backend REST API berjalan di:
-`http://127.0.0.1:5000/`
+Buka peramban di:
+**`http://127.0.0.1:5173/`**
 
 ---
 

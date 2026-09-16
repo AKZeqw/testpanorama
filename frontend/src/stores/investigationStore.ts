@@ -7,7 +7,10 @@ export interface InvestigationResult {
   totalEvidences: number
   foundEvidencesCount: number
   isSuspectCorrect: boolean
+  isModusOperandiCorrect: boolean
   isExplanationValid: boolean
+  redHerringsCount: number
+  selectedRedHerringIds?: string[]
   formattedTime: string
   selectedSuspectName: string
   supportingEvidencesCount: number
@@ -19,7 +22,8 @@ export const useInvestigationStore = defineStore('investigation', () => {
   const discoveredEvidenceIds = ref<string[]>([])
   const notes = ref<string[]>([
     'Jam 22:10 listrik sempat padam selama 5 menit.',
-    'Pintu luar gedung tidak ada bekas congkelan.'
+    'Pintu luar gedung tidak ada bekas congkelan.',
+    'Hujan lebat baru turun pada pukul 22:08 WIB.'
   ])
 
   // Timer
@@ -29,6 +33,7 @@ export const useInvestigationStore = defineStore('investigation', () => {
 
   // Conclusion
   const selectedSuspectId = ref<string | null>(null)
+  const selectedModusOperandi = ref<string>('')
   const conclusionExplanation = ref<string>('')
   const supportingEvidenceIds = ref<string[]>([])
   const result = ref<InvestigationResult | null>(null)
@@ -84,40 +89,61 @@ export const useInvestigationStore = defineStore('investigation', () => {
     notes.value.splice(index, 1)
   }
 
-  function submitConclusion(suspectId: string, explanation: string, evidenceIds: string[]): InvestigationResult {
+  function submitConclusion(
+    suspectId: string,
+    explanation: string,
+    evidenceIds: string[],
+    modusOperandi: string = ''
+  ): InvestigationResult {
     stopTimer()
     selectedSuspectId.value = suspectId
+    selectedModusOperandi.value = modusOperandi
     conclusionExplanation.value = explanation
     supportingEvidenceIds.value = evidenceIds
 
     const currentCase = caseStore.currentCase
     const isSuspectCorrect = suspectId === currentCase.solution.correctSuspectId
+    const isModusOperandiCorrect = !currentCase.solution.correctModusOperandi ||
+                                   modusOperandi === currentCase.solution.correctModusOperandi
 
-    // Cek kata kunci dalam penjelasan
+    // Cek kata kunci dalam penjelasan kronologi
     const lowerExp = explanation.toLowerCase()
     const matches = currentCase.solution.explanationKeywords.filter(k => lowerExp.includes(k.toLowerCase()))
     const isExplanationValid = matches.length >= 2 || explanation.length > 30
 
     // Hitung score
     let score = 0
-    // Bukti ditemukan (maksimal 40 poin)
-    const evidencePcnt = discoveredEvidenceIds.value.length / (totalEvidenceCount.value || 1)
-    score += Math.round(evidencePcnt * 40)
 
-    // Tersangka tepat (40 poin)
+    // 1. Tersangka tepat (35 poin)
     if (isSuspectCorrect) {
-      score += 40
+      score += 35
     }
 
-    // Bukti pendukung tepat (maksimal 10 poin)
+    // 2. Modus operandi tepat (15 poin)
+    if (isModusOperandiCorrect) {
+      score += 15
+    }
+
+    // 3. Cakupan bukti ditemukan di TKP (maksimal 25 poin)
+    const evidencePcnt = discoveredEvidenceIds.value.length / (totalEvidenceCount.value || 1)
+    score += Math.round(evidencePcnt * 25)
+
+    // 4. Ketepatan bukti kunci pendukung (maksimal 15 poin)
     const correctEvIds = currentCase.solution.keyEvidenceIds
     const matchedEvs = evidenceIds.filter(id => correctEvIds.includes(id))
-    score += Math.round((matchedEvs.length / (correctEvIds.length || 1)) * 10)
+    score += Math.round((matchedEvs.length / (correctEvIds.length || 1)) * 15)
 
-    // Bonus penjelasan logis (10 poin)
+    // 5. Bonus penalaran tertulis (10 poin)
     if (isExplanationValid) {
       score += 10
     }
+
+    // 6. PENALTI BUKTI JEBAKAN (Red Herrings)
+    // Jika mahasiswa asal mencentang bukti tidak relevan, kurangi poin
+    const redHerrings = currentCase.solution.redHerringEvidenceIds || []
+    const selectedRedHerrings = evidenceIds.filter(id => redHerrings.includes(id))
+    const penalty = selectedRedHerrings.length * 10
+    score = Math.max(0, score - penalty)
 
     const suspectObj = caseStore.suspects.find(s => s.id === suspectId)
 
@@ -126,7 +152,10 @@ export const useInvestigationStore = defineStore('investigation', () => {
       totalEvidences: totalEvidenceCount.value,
       foundEvidencesCount: discoveredEvidenceIds.value.length,
       isSuspectCorrect,
+      isModusOperandiCorrect,
       isExplanationValid,
+      redHerringsCount: selectedRedHerrings.length,
+      selectedRedHerringIds: selectedRedHerrings,
       formattedTime: formattedTime.value,
       selectedSuspectName: suspectObj?.name || 'Belum dipilih',
       supportingEvidencesCount: evidenceIds.length
@@ -141,6 +170,7 @@ export const useInvestigationStore = defineStore('investigation', () => {
     secondsElapsed.value = 0
     discoveredEvidenceIds.value = []
     selectedSuspectId.value = null
+    selectedModusOperandi.value = ''
     conclusionExplanation.value = ''
     supportingEvidenceIds.value = []
     result.value = null

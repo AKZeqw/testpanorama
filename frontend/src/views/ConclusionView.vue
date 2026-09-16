@@ -13,12 +13,31 @@ const suspects = computed(() => caseStore.suspects)
 const discoveredEvidences = computed(() => investigationStore.discoveredEvidences)
 
 const selectedSuspectId = ref<string>(investigationStore.selectedSuspectId || '')
+const selectedModus = ref<string>('modus-andi')
 const explanation = ref<string>(investigationStore.conclusionExplanation || '')
 const selectedEvidenceIds = ref<string[]>(
   investigationStore.supportingEvidenceIds.length > 0
     ? [...investigationStore.supportingEvidenceIds]
     : [...investigationStore.discoveredEvidenceIds]
 )
+
+const modusOptions = [
+  {
+    id: 'modus-andi',
+    title: 'Sabotase Internal & Pembobolan Brankas',
+    desc: 'Pelaku memotong kabel CCTV, memanfaatkan pemadaman listrik untuk membuka brankas menggunakan kartu RFID master curian, lalu menghapus rekaman log digital.'
+  },
+  {
+    id: 'modus-budi',
+    title: 'Penerobosan Fisik Luar Gedung',
+    desc: 'Pelaku mendobrak paksa pintu darurat dari area luar pagar saat gerbang utama tidak terjaga, lalu kabur melewati semak-semak.'
+  },
+  {
+    id: 'modus-citra',
+    title: 'Peretasan Jarak Jauh (Remote Cyberattack)',
+    desc: 'Pelaku sama sekali tidak masuk ke lokasi kejadian perkara dan hanya mengeksploitasi celah keamanan server lewat jaringan VPN publik.'
+  }
+]
 
 const toggleEvidence = (id: string) => {
   if (selectedEvidenceIds.value.includes(id)) {
@@ -37,7 +56,8 @@ const handleSubmit = () => {
   investigationStore.submitConclusion(
     selectedSuspectId.value,
     explanation.value,
-    selectedEvidenceIds.value
+    selectedEvidenceIds.value,
+    selectedModus.value
   )
 
   router.push(`/cases/${currentCase.value.id}/result`)
@@ -75,10 +95,10 @@ const handleSubmit = () => {
       <!-- Section 1: WHO IS RESPONSIBLE -->
       <section class="bg-crime-900 border border-crime-700/80 rounded-2xl p-6 shadow-xl">
         <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-          <span>1.</span> SIAPA PELAKU YANG PALING BERTANGGUNG JAWAB?
+          <span>1.</span> SIAPA PELAKU UTAMA YANG PALING BERTANGGUNG JAWAB?
         </h3>
         <p class="text-xs text-gray-400 mb-5">
-          Tentukan siapa tersangka utama berdasarkan alibi dan bukti fisik yang ditemukan di TKP.
+          Tentukan siapa tersangka utama berdasarkan motif, alibi, dan fakta biometrik yang ditemukan di TKP.
         </p>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -108,31 +128,73 @@ const handleSubmit = () => {
         </div>
       </section>
 
-      <!-- Section 2: WHAT HAPPENED -->
+      <!-- Section 2: MODUS OPERANDI -->
       <section class="bg-crime-900 border border-crime-700/80 rounded-2xl p-6 shadow-xl">
         <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-          <span>2.</span> BAGAIMANA REKONSTRUKSI KRONOLOGI KEJADIAN?
+          <span>2.</span> APA MODUS OPERANDI / METODE YANG DIGUNAKAN PELAKU?
         </h3>
         <p class="text-xs text-gray-400 mb-4">
-          Jelaskan secara singkat alur pelaku saat mengambil barang bukti dan mematikan pengawasan.
+          Pilih skenario operasional yang paling akurat sesuai dengan kondisi fisik instalasi TKP.
+        </p>
+
+        <div class="space-y-3">
+          <div
+            v-for="modus in modusOptions"
+            :key="modus.id"
+            @click="selectedModus = modus.id"
+            :class="[
+              'p-4 rounded-xl border cursor-pointer transition flex items-start gap-3',
+              selectedModus === modus.id
+                ? 'bg-crime-850 border-red-500 ring-1 ring-red-500/50'
+                : 'bg-crime-950 border-crime-800 hover:border-gray-700'
+            ]"
+          >
+            <input
+              type="radio"
+              :checked="selectedModus === modus.id"
+              name="modus"
+              class="mt-1 text-red-600 focus:ring-0 cursor-pointer"
+            />
+            <div>
+              <h4 class="text-xs font-bold text-white mb-1">{{ modus.title }}</h4>
+              <p class="text-[11px] text-gray-400 leading-relaxed">{{ modus.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: WHAT HAPPENED (EXPLANATION) -->
+      <section class="bg-crime-900 border border-crime-700/80 rounded-2xl p-6 shadow-xl">
+        <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+          <span>3.</span> BAGAIMANA REKONSTRUKSI KRONOLOGI KEJADIAN?
+        </h3>
+        <p class="text-xs text-gray-400 mb-4">
+          Jelaskan secara ringkas rangkaian urutan waktu, alibi yang terpatahkan, dan tindakan pelaku di lokasi.
         </p>
 
         <textarea
           v-model="explanation"
           rows="4"
-          placeholder="Contoh: Pelaku menggunakan kartu akses master untuk membuka lab, memotong kabel CCTV, lalu mengakses laptop untuk menghapus rekaman log sebelum membawa lari sampel..."
-          class="w-full bg-crime-950 border border-crime-700 rounded-xl p-4 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-red-500 transition leading-relaxed"
+          placeholder="Contoh: Pelaku masuk sebelum hujan lebat jam 22:08, memotong kabel CCTV lab, lalu membuka brankas arsip jam 22:12. Sidik jari UV pada gagang pintu mematahkan alibinya..."
+          class="w-full bg-crime-950 border border-crime-700 rounded-xl p-4 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-red-500 transition leading-relaxed font-mono"
         ></textarea>
       </section>
 
-      <!-- Section 3: SUPPORTING EVIDENCE -->
+      <!-- Section 4: SUPPORTING EVIDENCE -->
       <section class="bg-crime-900 border border-crime-700/80 rounded-2xl p-6 shadow-xl">
-        <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-          <span>3.</span> BUKTI MANA SAJA YANG MENDUKUNG KESIMPULAN ANDA?
-        </h3>
-        <p class="text-xs text-gray-400 mb-4">
-          Centang bukti yang paling krusial membuktikan keterlibatan tersangka.
-        </p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-white mb-0.5 flex items-center gap-2">
+              <span>4.</span> BUKTI MANA SAJA YANG MENDUKUNG TUDUHAN ANDA?
+            </h3>
+            <p class="text-xs text-gray-400">
+              Pilih bukti kunci yang sah.
+            </p>
+          </div>
+          <span class="text-[11px] font-mono px-3 py-1 rounded bg-amber-950/70 text-amber-300 border border-amber-800 self-start sm:self-auto">
+            ⚠️ Perhatian: Bukti tidak relevan (Red Herrings) akan mengurangi nilai!
+          </span>
+        </div>
 
         <div v-if="discoveredEvidences.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label
@@ -152,14 +214,19 @@ const handleSubmit = () => {
                 @change="toggleEvidence(ev.id)"
                 class="rounded border-crime-700 bg-crime-800 text-red-600 focus:ring-0 w-4 h-4 cursor-pointer"
               />
-              <span class="text-xs font-semibold">{{ ev.name }}</span>
+              <div>
+                <span class="text-xs font-semibold block text-white">{{ ev.name }}</span>
+                <span class="text-[10px] text-gray-400 line-clamp-1">{{ ev.discoveredSceneName }}</span>
+              </div>
             </div>
-            <span class="text-[10px] font-mono text-gray-500">{{ ev.importance }}</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded text-gray-300 bg-crime-800 border border-crime-700">
+              {{ ev.category || 'Bukti Temuan' }}
+            </span>
           </label>
         </div>
 
         <div v-else class="p-6 bg-crime-950 border border-dashed border-crime-800 rounded-xl text-center text-xs text-gray-500">
-          Anda belum mengumpulkan bukti apa pun dari TKP. Anda tetap dapat submit, namun nilai akurasi akan lebih rendah.
+          Anda belum mengumpulkan bukti apa pun dari TKP. Silakan kembali ke investigasi 360° untuk mencari bukti.
         </div>
       </section>
 
